@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+  <g transform="translate(120, 80)" fill="white">
+    <!-- Book shape -->
+    <path d="M20 0 C20 0, 136 10, 136 10 L136 310 C136 310, 20 300, 20 300 Z" fill="white" opacity="0.9"/>
+    <path d="M252 0 C252 0, 136 10, 136 10 L136 310 C136 310, 252 300, 252 300 Z" fill="white" opacity="0.75"/>
+    <!-- Pages -->
+    <line x1="50" y1="60" x2="120" y2="65" stroke="#2563eb" stroke-width="4" opacity="0.4"/>
+    <line x1="50" y1="90" x2="120" y2="95" stroke="#2563eb" stroke-width="4" opacity="0.4"/>
+    <line x1="50" y1="120" x2="120" y2="125" stroke="#2563eb" stroke-width="4" opacity="0.4"/>
+    <line x1="50" y1="150" x2="100" y2="155" stroke="#2563eb" stroke-width="4" opacity="0.4"/>
+    <!-- Flame/kindle -->
+    <path d="M136 220 C136 180, 170 190, 160 160 C190 190, 200 170, 195 210 C210 195, 210 230, 185 260 C170 275, 145 270, 136 250 C130 260, 115 255, 120 240 C125 250, 136 245, 136 220Z" fill="#f59e0b" opacity="0.9"/>
+  </g>
+  <!-- Text -->
+  <text x="256" y="430" text-anchor="middle" fill="white" font-family="sans-serif" font-size="52" font-weight="bold" letter-spacing="4">KINDLED</text>
+</svg>

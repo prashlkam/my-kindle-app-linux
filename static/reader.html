@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reader</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--reader-bg, #ffffff);
+      color: var(--reader-fg, #1a1a1a);
+      font-family: serif;
+    }
+    #reader {
+      height: 100%;
+      width: 100%;
+    }
+    #reader > div {
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="reader"></div>
+
+  <script type="module">
+    // This script handles communication with the parent Svelte app
+    // and initializes foliate-js for book rendering.
+
+    const container = document.getElementById('reader');
+
+    // State
+    let view = null;
+    let currentStyle = {
+      fontSize: 18,
+      fontFamily: 'serif',
+      lineHeight: 1.6,
+      margin: 40,
+    };
+
+    // Theme mappings
+    const themes = {
+      light: { bg: '#ffffff', fg: '#1a1a1a' },
+      dark: { bg: '#1a1a2e', fg: '#e0e0e0' },
+      sepia: { bg: '#f4ecd8', fg: '#3d2b1f' },
+    };
+
+    function applyStyle() {
+      if (!view) return;
+      const style = {
+        fontSize: `${currentStyle.fontSize}px`,
+        fontFamily: currentStyle.fontFamily,
+        lineHeight: currentStyle.lineHeight,
+        padding: `${currentStyle.margin}px`,
+      };
+      try {
+        view.renderer?.setStyles?.(style);
+      } catch { /* renderer may not support setStyles */ }
+    }
+
+    function applyTheme(theme) {
+      const t = themes[theme] || themes.light;
+      document.documentElement.style.setProperty('--reader-bg', t.bg);
+      document.documentElement.style.setProperty('--reader-fg', t.fg);
+      document.body.style.background = t.bg;
+      document.body.style.color = t.fg;
+    }
+
+    function sendToParent(type, payload) {
+      window.parent.postMessage({ type, payload }, '*');
+    }
+
+    async function openBook(data, fileName) {
+      container.innerHTML = '';
+
+      try {
+        // Dynamically import foliate-js modules
+        // These will be available when foliate-js is installed in vendor/
+        const { makeBook } = await import('/vendor/foliate-js/book.js');
+        const { View } = await import('/vendor/foliate-js/view.js');
+
+        const file = new File([data], fileName);
+        const book = await makeBook(file);
+
+        view = new View({ book, container });
+
+        // Handle relocation (page changes)
+        view.addEventListener('relocate', (e) => {
+          const { fraction, location, cfi, section, time } = e.detail;
+          sendToParent('relocated', { fraction, location, cfi, section, time });
+        });
+
+        // Handle text selection
+        view.addEventListener('select', (e) => {
+          const { text, cfi, pos } = e.detail;
+          sendToParent('selection', {
+            text,
+            cfi,
+            position: { x: pos?.point?.x || 0, y: pos?.point?.y || 0 },
+          });
+        });
+
+        // Handle word lookup (long press / double click)
+        view.addEventListener('lookup', (e) => {
+          const { word, pos } = e.detail;
+          sendToParent('word-lookup', {
+            word,
+            position: { x: pos?.point?.x || 0, y: pos?.point?.y || 0 },
+          });
+        });
+
+        // Load TOC
+        const toc = book.toc || [];
+        sendToParent('toc-loaded', toc);
+
+        applyStyle();
+        sendToParent('book-ready', {});
+
+        // Render
+        await view.display();
+      } catch (err) {
+        console.error('Failed to open book:', err);
+        container.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;color:#888;">
+            <p style="font-size:16px;">Failed to open book</p>
+            <p style="font-size:13px;">${err.message || 'Unknown error'}</p>
+            <p style="font-size:12px;opacity:0.6;">Make sure foliate-js is installed in vendor/foliate-js/</p>
+          </div>
+        `;
+      }
+    }
+
+    // Listen for messages from parent
+    window.addEventListener('message', async (e) => {
+      const { type, payload } = e.data || {};
+
+      switch (type) {
+        case 'open-book':
+          await openBook(payload.data, payload.fileName);
+          break;
+
+        case 'go-next':
+          view?.goNext?.();
+          view?.next?.();
+          break;
+
+        case 'go-prev':
+          view?.goPrev?.();
+          view?.prev?.();
+          break;
+
+        case 'go-to':
+          if (payload.cfi && view) {
+            view.goTo?.(payload.cfi);
+            view.display?.(payload.cfi);
+          }
+          break;
+
+        case 'go-to-href':
+          if (payload.href && view) {
+            view.goTo?.(payload.href);
+          }
+          break;
+
+        case 'set-style':
+          Object.assign(currentStyle, payload);
+          applyStyle();
+          break;
+
+        case 'set-theme':
+          applyTheme(payload.theme);
+          break;
+
+        case 'add-highlight':
+          if (view && payload.cfi) {
+            try {
+              view.addAnnotation?.({
+                value: payload.cfi,
+                type: 'highlight',
+                color: payload.color || 'yellow',
+              });
+            } catch { /* ok */ }
+          }
+          break;
+
+        case 'remove-highlight':
+          if (view && payload.cfi) {
+            try {
+              view.removeAnnotation?.(payload.cfi);
+            } catch { /* ok */ }
+          }
+          break;
+
+        case 'search':
+          if (view && payload.query) {
+            try {
+              const results = await view.search?.(payload.query);
+              sendToParent('search-results', results || []);
+            } catch { /* ok */ }
+          }
+          break;
+
+        case 'get-toc':
+          if (view) {
+            const toc = view.book?.toc || [];
+            sendToParent('toc-loaded', toc);
+          }
+          break;
+
+        case 'set-scroll-mode':
+          if (view) {
+            try {
+              view.renderer?.setAttribute?.('flow', payload.enabled ? 'scrolled' : 'paginated');
+            } catch { /* ok */ }
+          }
+          break;
+      }
+    });
+
+    // Notify parent that reader iframe is ready
+    sendToParent('reader-iframe-ready', {});
+  </script>
+</body>
+</html>

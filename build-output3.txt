@@ -1,0 +1,42 @@
+   Compiling tinystr v0.8.2
+error[E0463]: can't find crate for `displaydoc`
+ --> C:\Users\prashanth\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tinystr-0.8.2\src\error.rs:5:5
+  |
+5 | use displaydoc::Display;
+  |     ^^^^^^^^^^ can't find crate
+
+error: cannot find attribute `displaydoc` in this scope
+  --> C:\Users\prashanth\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tinystr-0.8.2\src\error.rs:12:7
+   |
+12 |     #[displaydoc("found string of larger length {len} when constructing string of length {max}")]
+   |       ^^^^^^^^^^
+
+error: cannot find attribute `displaydoc` in this scope
+  --> C:\Users\prashanth\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tinystr-0.8.2\src\error.rs:14:7
+   |
+14 |     #[displaydoc("tinystr types do not support strings with null bytes")]
+   |       ^^^^^^^^^^
+
+error: cannot find attribute `displaydoc` in this scope
+  --> C:\Users\prashanth\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tinystr-0.8.2\src\error.rs:16:7
+   |
+16 |     #[displaydoc("attempted to construct TinyAsciiStr from a non-ASCII string")]
+   |       ^^^^^^^^^^
+
+error[E0277]: `error::ParseError` doesn't implement `Display`
+  --> C:\Users\prashanth\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tinystr-0.8.2\src\error.rs:7:29
+   |
+ 7 | impl core::error::Error for ParseError {}
+   |                             ^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `Display` is not implemented for `error::ParseError`
+  --> C:\Users\prashanth\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tinystr-0.8.2\src\error.rs:11:1
+   |
+11 | pub enum ParseError {
+   | ^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `core::error::Error`
+  --> /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library\core\src\error.rs:59:0
+
+Some errors have detailed explanations: E0277, E0463.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `tinystr` (lib) due to 5 previous errors
