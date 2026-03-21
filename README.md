@@ -85,4 +85,4 @@ kindle-app-linux/
 
 ## License
 
-MIT
+GPL - Ver 3.0
