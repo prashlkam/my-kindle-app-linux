@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedaycode/tauri/dev/crates/tauri-config-schema/schema.json",
+  "productName": "Kindled",
+  "version": "0.1.0",
+  "identifier": "com.kindled.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "title": "Kindled",
+    "windows": [
+      {
+        "title": "Kindled",
+        "width": 1200,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "minWidth": 800,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://data: blob:; connect-src 'self' https://api.dictionaryapi.dev",
+      "dangerousDisableAssetCspModification": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
