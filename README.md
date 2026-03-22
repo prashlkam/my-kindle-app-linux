@@ -1,4 +1,4 @@
-# Kindled
+# my Kindle app linux
 
 A native Linux ebook reader for Kindle formats, built with Tauri 2 + Svelte 5 + Rust.
 
@@ -186,4 +186,4 @@ kindle-app-linux/
 
 ## License
 
-MIT
+GPL - Ver 3.0
